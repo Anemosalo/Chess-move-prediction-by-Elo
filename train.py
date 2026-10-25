@@ -6,11 +6,13 @@ import torch.nn as nn
 import time
 import json
 import glob
+import os
+import argparse
 #import matplotlib.pyplot as plt
 
 def load_shard(path):
     d = np.load(path)
-    return tuple(d[k] for k in ("planes","y","legal_flat","offsets","rating","split"))
+    return tuple(d[k] for k in ("planes","y","legal_flat","offsets","rating","split","game_id"))
 
 
 def get_batch(idx,planes , y ,legal_flat ,offsets, rating):
@@ -91,56 +93,179 @@ def evaluate(model,rows,planes,y,legal_flat,offsets,rating,device):
         model.train()
         return total_bits/total_n , correct/total_n
 
+
+def parse_args():
+    p = argparse.ArgumentParser(description="Training or evaluation of the move prediction network")
+    p.add_argument("--data",default="1000-1199",help="the rating band to train on for example 1000-1199 or 1400-1599")
+    p.add_argument("--init",default="scratch",help="'scratch' or a path to the saved weights from previous training")
+    p.add_argument("--tune",default="all", choices=["all","bn"],help="which weights are allowed to change. 'all' by default and 'bn' for only the Batch Norms γ and β")
+    p.add_argument("--games",type=int,default=None,help="Use only the first N training games")
+    p.add_argument("--epochs",type=int,default=1,help="Number of epochs on the training data")
+    p.add_argument("--lr",type=float,default=1e-3,help="Learning rate, 1e-3 by default")
+    p.add_argument("--seed",type=int,default=0,help="Seed to get identical results on same seeds")
+    p.add_argument("--eval-every",type=int,default=200,help="After how many training steps to evaluate. 200 by default")
+    p.add_argument("--also",nargs="*",default=[],help="What extra bands to also mesure on, for example 1000-1199")
+    p.add_argument("--out",required=True,help="run folder name inside of runs/")
+    p.add_argument("--test",action="store_true",help="mesure of the best weights once on the test split set at the end")
+    p.add_argument("--eval-only",action="store_true",help="No training just mesure --init ont --data and --also")
+    p.add_argument("--patience", type=int,default=None,help="Stop after this number of evaluations if val is not improving. default = None means never stop early")
+    p.add_argument("--test-shards", type=int, default=1, help="use the test rows of the first N shards (99 = all)")
+    return p.parse_args()
+
+
+def band_paths(band):
+    return sorted(glob.glob(f"data/games_encoded/lichess_2026-09_elo{band}_blitz_*.npz"))
+
+def load_val(band):
+    data = load_shard(band_paths(band)[0])
+    rows = np.flatnonzero(data[5]==1)
+    return rows,data
+
+def train_plan(band,n_games): ## we do all this suffling instead of getting the first n in order for the seed to have impact and give random results for different seeds
+    plan = []
+    remaining = n_games
+    for path in band_paths(band):
+        d = np.load(path)
+        split,game_id = d["split"],d["game_id"]
+        train_rows = np.flatnonzero(split==0)
+        if remaining is not None:
+            games_here = np.unique(game_id[train_rows]) ## Its the training games in this shard
+            keep = np.random.permutation(games_here)[:remaining] # random selections of them with at most remaining
+            train_rows = train_rows[np.isin(game_id[train_rows],keep)]
+            remaining -=len(keep)
+        plan.append((path,train_rows))
+        if remaining==0: ## got all games we want so break and return
+            break
+
+    return plan
+
+def evaluate_split(model, band, split_value, n_shards, device):
+    total_bits, total_top1, total_n = 0.0, 0.0, 0
+    for path in band_paths(band)[:n_shards]:
+        data = load_shard(path)
+        rows = np.flatnonzero(data[5] == split_value)
+        bits, top1 = evaluate(model, rows, *data[:5], device)
+        total_bits += bits * len(rows)          # evaluate returns means, so × count = sums
+        total_top1 += top1 * len(rows)
+        total_n += len(rows)
+    return total_bits / total_n, total_top1 / total_n, total_n
+
+def run_test(model, bands, n_shards, run_dir, device):
+    """Measures the model on the test split of each band and saves the results to run_dir/test.json."""
+    test = {}
+    for band in bands:
+        bits, top1, n = evaluate_split(model, band, 2, n_shards, device)
+        test[band] = {"bits": bits, "top1": top1, "positions": n}
+        print(f"TEST {band}: {bits:.3f} bits, top-1 {top1:.1%} ({n:,} positions)", flush=True)
+    with open(os.path.join(run_dir, "test.json"), "w") as f:
+        json.dump(test, f, indent=2)
+
+
+
+
 def main():
+
+    args = parse_args()
+
+    run_dir = os.path.join("runs",args.out)
+    os.makedirs(run_dir,exist_ok=False)
+
+    with open(os.path.join(run_dir,"config.json"),"w") as f:
+        json.dump(vars(args),f,indent=2)
+
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
+    plan = train_plan(args.data,args.games)
+    n_positions = sum(len(rows) for _,rows in plan)
+
+
     device = "cuda"if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu") 
-    ## Getting the Data##
-    B = 1024
-    paths = sorted(glob.glob("data/games_encoded/lichess_2026-09_elo1000-1199_blitz_*.npz"))
-    ## NETWORK: ##
-
-    val_data = load_shard(paths[0]) #tuple of (planes, y, legal_flat, offsets, rating, split)
-    val_rows = np.flatnonzero(val_data[5] == 1) # val_data[5] is split
     model = Network().to(device)
-    print("Before Training: ",evaluate(model,val_rows,*val_data[:5],device))
-    
-    
-    
-    
-    
-    
-    
-    model.train()
-    optimizier = torch.optim.Adam(model.parameters(),lr=1e-3)
-    best = float("inf")
+    if args.init !="scratch":
+        model.load_state_dict(torch.load(args.init,map_location=device))
 
-    history = {"step":[] , "train_bits": [] , "val_step":[] , "val_bits":[], "val_top1": [], "epoch_end":[]}
+
+    if args.tune =="bn":
+        if args.init=="scratch":
+            raise SystemExit("--tune bn needs --init with already saved weights")
+        for name, p in model.named_parameters():
+            p.requires_grad = ("bn" in name) or name.startswith("exit_head")
+
+    trainable = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.Adam(trainable,lr=args.lr)
+    print("trainable weights:", sum(p.numel() for p in trainable))
+
+    vals = {band: load_val(band) for band in [args.data]+args.also}
+
+    if args.eval_only: # no training: measure --init on val (and test) and stop
+        if args.init == "scratch":
+            raise SystemExit("--eval-only needs --init with saved weights")
+        for band, (rows, data) in vals.items():
+            bits, top1 = evaluate(model, rows, *data[:5], device)
+            print(f"VAL {band}: {bits:.3f} bits, top-1 {top1:.1%}", flush=True)
+        if args.test:
+            run_test(model, [args.data] + args.also, args.test_shards, run_dir, device)
+        return
+    history = {"step":[], "train_bits":[], "epoch_end":[],"val":{band:{"step":[],"bits":[],"top1":[]}for band in vals}}
+    
     step = 0
-    window_bits,window_n=0.0,0
+    best = float("inf")
+    bad_evals = 0
+    stop = False
+    window_bits,window_n =0.0,0
+    cache = {} if len(plan)<=3 else None
+    B=1024
 
-    val_bits, val_top1 = evaluate(model, val_rows, *val_data[:5], device)
-    history["val_step"].append(0)
-    history["val_bits"].append(val_bits)
-    history["val_top1"].append(val_top1)
-    for epoch in range(2):
+
+    
+
+
+    def mesure():
+        nonlocal best,bad_evals,stop 
+        for band ,(rows,data) in vals.items():
+            bits,top1 = evaluate(model,rows,*data[:5],device)
+            h = history["val"][band]
+            h["step"].append(step)
+            h["bits"].append(bits)
+            h["top1"].append(top1)
+            print(f"step {step} | {band}: {bits:.3f} bits, top-1 {top1:.1%}", flush=True)
+
+        current = history["val"][args.data]["bits"][-1] # training bands last val
+        if current<best:
+            best = current
+            bad_evals = 0
+            torch.save(model.state_dict(),os.path.join(run_dir,"best.pt"))
+        else:
+            bad_evals+=1
+            if args.patience is not None and bad_evals>=args.patience:
+                stop = True
+        with open(os.path.join(run_dir,"history.json"),"w") as f:
+            json.dump(history,f)
+
+
+    mesure()
+    for epoch in range(args.epochs):
         t = time.time()
-
-        total_bits, total_n = 0.0,0
-        for path in np.random.permutation(paths):
-            planes, y, legal_flat, offsets, rating, split = load_shard(path) 
-            train_rows = np.flatnonzero(split==0)
-            order = np.random.permutation(train_rows)
-            for start in range(0,len(order),1024):
+        for i in np.random.permutation(len(plan)):
+            path,rows = plan[i]
+            if cache is not None and path in cache:
+                data = cache[path]
+            else: 
+                data = load_shard(path)
+                if cache is not None:
+                    cache[path] = data
+            planes,y,legal_flat,offsets,rating = data[:5]
+            order = np.random.permutation(rows)
+            for start in range(0,len(order),B):
                 idx = order[start:start+B]
                 X, mask, target = get_batch(idx, planes, y, legal_flat, offsets, rating)
                 X,mask,target = X.to(device) , mask.to(device), target.to(device)
                 logits = model(X)  
                 loss = F.cross_entropy(logits+mask,target)/math.log(2) #calculated with natural log so we divide by log(2) to get bits meaning log_2 calculation instead of log_e
-                optimizier.zero_grad()
+                optimizer.zero_grad()
                 loss.backward()
-                optimizier.step()
-                total_bits += loss.item()*len(idx)
-                total_n += len(idx)
-
+                optimizer.step()
                 step+=1
                 window_bits+=loss.item()
                 window_n+=1
@@ -148,25 +273,25 @@ def main():
                     history["step"].append(step)
                     history["train_bits"].append(window_bits/window_n)
                     window_bits,window_n=0.0,0
-            print(f"epoch {epoch} {path[-7:-4]}: train so far {total_bits/total_n:.3f}",flush=True)
-            val_bits, val_top1 = evaluate(model, val_rows, *val_data[:5], device)
-            history["val_step"].append(step)
-            history["val_bits"].append(val_bits)
-            history["val_top1"].append(val_top1)
-            with open("history.json","w") as f:
-                json.dump(history,f)
-        train_bits = total_bits/total_n
+                if step % args.eval_every == 0:
+                    mesure()
+                    if stop:
+                        break
+            if stop:
+                break
         history["epoch_end"].append(step)
-        with open("history.json","w") as f:
-            json.dump(history,f)
-        print(f"epoch {epoch}: train {train_bits:.3f}  val {val_bits:.3f}  ({time.time() - t:.0f}s)", flush=True)
-        if val_bits < best:
-            best = val_bits
-            torch.save(model.state_dict(),"best.pt")
+        print(f"epoch {epoch} done ({time.time()-t:.0f})s",flush=True)
+        if stop:
+            print("Early stopping: eval stoped improving")
+            break
+    if step% args.eval_every !=0:
+        mesure() #mesure the final state too
+    with open(os.path.join(run_dir, "history.json"), "w") as f:
+        json.dump(history, f)
 
-
-    
-
+    if args.test: # the best weights (not the last ones), measured once on the test split
+        model.load_state_dict(torch.load(os.path.join(run_dir, "best.pt"), map_location=device))
+        run_test(model, [args.data] + args.also, args.test_shards, run_dir, device)
 
 
 
