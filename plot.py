@@ -21,6 +21,23 @@ UNIFORM = {
     "2000-2199": (4.679, 6.03),
 }
 
+# One fixed colour per band, so a band looks the same in every run's plot
+BAND_COLORS = {
+    "1000-1199": "tab:orange",
+    "2000-2199": "tab:green",
+}
+OTHER_COLORS = ["tab:red", "tab:purple", "tab:brown", "tab:pink", "tab:olive", "tab:cyan"]
+
+
+def band_color(band):
+    if band in BAND_COLORS:
+        return BAND_COLORS[band]
+    others = sorted(b for b in seen_bands if b not in BAND_COLORS)
+    return OTHER_COLORS[others.index(band) % len(OTHER_COLORS)]
+
+
+seen_bands = set()
+
 
 def load_history(run_dir):
     """Returns (history, training band). Also reads the old format of run 1 (one val record, no config.json)."""
@@ -51,8 +68,9 @@ def draw(h, band, test, ax1, ax2):
     last_step = max([0] + h["step"] + [s for v in h["val"].values() for s in v["step"]])
 
     ax1.plot(h["step"], h["train_bits"], color="tab:blue", alpha=0.6, label="train (avg of 50 steps)")
-    for i, (b, v) in enumerate(h["val"].items()):
-        color = f"C{i + 1}"     # matplotlib's colour cycle: C1 orange, C2 green, …
+    seen_bands.update(h["val"])
+    for b, v in h["val"].items():
+        color = band_color(b)
         name = "val" if b == band else "also"
         ax1.plot(v["step"], v["bits"], "o-", color=color, markersize=4, label=f"{name} {b}")
         ax2.plot(v["step"], [t * 100 for t in v["top1"]], "o-", color=color, markersize=4, label=f"{name} {b}")

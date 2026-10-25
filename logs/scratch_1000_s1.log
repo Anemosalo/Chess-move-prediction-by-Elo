@@ -1,0 +1,51 @@
+trainable weights: 459145
+step 0 | 2000-2199: 4.683 bits, top-1 6.1%
+step 0 | 1000-1199: 4.588 bits, top-1 5.8%
+step 37 | 2000-2199: 4.250 bits, top-1 17.3%
+step 37 | 1000-1199: 4.454 bits, top-1 12.9%
+step 74 | 2000-2199: 4.020 bits, top-1 21.0%
+step 74 | 1000-1199: 4.918 bits, top-1 12.6%
+epoch 0 done (38)s
+step 111 | 2000-2199: 3.935 bits, top-1 23.0%
+step 111 | 1000-1199: 5.760 bits, top-1 12.0%
+step 148 | 2000-2199: 3.871 bits, top-1 23.9%
+step 148 | 1000-1199: 5.050 bits, top-1 12.3%
+epoch 1 done (37)s
+step 185 | 2000-2199: 3.847 bits, top-1 24.2%
+step 185 | 1000-1199: 5.544 bits, top-1 11.8%
+step 222 | 2000-2199: 3.788 bits, top-1 25.2%
+step 222 | 1000-1199: 4.381 bits, top-1 15.7%
+epoch 2 done (37)s
+step 259 | 2000-2199: 3.783 bits, top-1 25.3%
+step 259 | 1000-1199: 4.517 bits, top-1 15.1%
+step 296 | 2000-2199: 3.754 bits, top-1 26.0%
+step 296 | 1000-1199: 4.502 bits, top-1 14.7%
+epoch 3 done (37)s
+step 333 | 2000-2199: 3.819 bits, top-1 25.8%
+step 333 | 1000-1199: 4.473 bits, top-1 15.2%
+step 370 | 2000-2199: 3.755 bits, top-1 26.3%
+step 370 | 1000-1199: 4.668 bits, top-1 14.7%
+epoch 4 done (37)s
+step 407 | 2000-2199: 3.836 bits, top-1 25.8%
+step 407 | 1000-1199: 4.635 bits, top-1 17.1%
+step 444 | 2000-2199: 3.777 bits, top-1 26.8%
+step 444 | 1000-1199: 4.921 bits, top-1 15.2%
+epoch 5 done (37)s
+step 481 | 2000-2199: 3.860 bits, top-1 25.8%
+step 481 | 1000-1199: 5.206 bits, top-1 13.5%
+step 518 | 2000-2199: 3.834 bits, top-1 26.2%
+step 518 | 1000-1199: 5.110 bits, top-1 12.9%
+epoch 6 done (37)s
+step 555 | 2000-2199: 4.038 bits, top-1 25.5%
+step 555 | 1000-1199: 5.245 bits, top-1 14.6%
+step 592 | 2000-2199: 3.908 bits, top-1 26.0%
+step 592 | 1000-1199: 5.273 bits, top-1 14.1%
+epoch 7 done (37)s
+step 629 | 2000-2199: 4.106 bits, top-1 25.4%
+step 629 | 1000-1199: 5.324 bits, top-1 14.9%
+step 666 | 2000-2199: 3.981 bits, top-1 26.2%
+step 666 | 1000-1199: 5.478 bits, top-1 14.7%
+epoch 8 done (37)s
+Early stopping: eval stoped improving
+TEST 2000-2199: 3.761 bits, top-1 26.1% (37,050 positions)
+TEST 1000-1199: 4.520 bits, top-1 14.8% (28,654 positions)

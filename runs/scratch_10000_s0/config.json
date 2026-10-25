@@ -1,0 +1,18 @@
+{
+  "data": "2000-2199",
+  "init": "scratch",
+  "tune": "all",
+  "games": 10000,
+  "epochs": 8,
+  "lr": 0.001,
+  "seed": 0,
+  "eval_every": 186,
+  "also": [
+    "1000-1199"
+  ],
+  "out": "scratch_10000_s0",
+  "test": true,
+  "eval_only": false,
+  "patience": 8,
+  "test_shards": 1
+}

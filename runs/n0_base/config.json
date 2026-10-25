@@ -1,0 +1,18 @@
+{
+  "data": "2000-2199",
+  "init": "runs/base/best.pt",
+  "tune": "all",
+  "games": null,
+  "epochs": 1,
+  "lr": 0.001,
+  "seed": 0,
+  "eval_every": 200,
+  "also": [
+    "1000-1199"
+  ],
+  "out": "n0_base",
+  "test": true,
+  "eval_only": true,
+  "patience": null,
+  "test_shards": 1
+}

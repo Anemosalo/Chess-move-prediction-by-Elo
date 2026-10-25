@@ -1,0 +1,56 @@
+trainable weights: 459145
+step 0 | 2000-2199: 4.662 bits, top-1 6.4%
+step 0 | 1000-1199: 4.582 bits, top-1 6.6%
+step 37 | 2000-2199: 4.247 bits, top-1 16.3%
+step 37 | 1000-1199: 4.601 bits, top-1 12.0%
+step 74 | 2000-2199: 4.012 bits, top-1 21.3%
+step 74 | 1000-1199: 5.036 bits, top-1 13.2%
+epoch 0 done (31)s
+step 111 | 2000-2199: 3.931 bits, top-1 23.1%
+step 111 | 1000-1199: 5.734 bits, top-1 11.7%
+step 148 | 2000-2199: 3.870 bits, top-1 23.9%
+step 148 | 1000-1199: 5.189 bits, top-1 14.1%
+epoch 1 done (29)s
+step 185 | 2000-2199: 3.810 bits, top-1 25.0%
+step 185 | 1000-1199: 5.230 bits, top-1 15.3%
+step 222 | 2000-2199: 3.777 bits, top-1 25.2%
+step 222 | 1000-1199: 6.418 bits, top-1 11.7%
+epoch 2 done (30)s
+step 259 | 2000-2199: 3.802 bits, top-1 25.3%
+step 259 | 1000-1199: 5.063 bits, top-1 14.2%
+step 296 | 2000-2199: 3.749 bits, top-1 25.8%
+step 296 | 1000-1199: 5.412 bits, top-1 13.1%
+epoch 3 done (30)s
+step 333 | 2000-2199: 3.786 bits, top-1 25.8%
+step 333 | 1000-1199: 5.932 bits, top-1 12.4%
+step 370 | 2000-2199: 3.742 bits, top-1 26.4%
+step 370 | 1000-1199: 6.089 bits, top-1 11.1%
+epoch 4 done (35)s
+step 407 | 2000-2199: 3.798 bits, top-1 25.8%
+step 407 | 1000-1199: 5.736 bits, top-1 12.0%
+step 444 | 2000-2199: 3.804 bits, top-1 26.2%
+step 444 | 1000-1199: 5.981 bits, top-1 11.5%
+epoch 5 done (39)s
+step 481 | 2000-2199: 3.958 bits, top-1 25.0%
+step 481 | 1000-1199: 6.585 bits, top-1 9.4%
+step 518 | 2000-2199: 3.857 bits, top-1 26.2%
+step 518 | 1000-1199: 6.750 bits, top-1 10.9%
+epoch 6 done (37)s
+step 555 | 2000-2199: 3.955 bits, top-1 25.6%
+step 555 | 1000-1199: 6.600 bits, top-1 9.7%
+step 592 | 2000-2199: 3.976 bits, top-1 25.6%
+step 592 | 1000-1199: 7.344 bits, top-1 11.3%
+epoch 7 done (37)s
+step 629 | 2000-2199: 4.072 bits, top-1 25.6%
+step 629 | 1000-1199: 6.441 bits, top-1 11.1%
+step 666 | 2000-2199: 3.999 bits, top-1 26.1%
+step 666 | 1000-1199: 6.214 bits, top-1 12.3%
+epoch 8 done (37)s
+step 703 | 2000-2199: 4.208 bits, top-1 25.1%
+step 703 | 1000-1199: 6.572 bits, top-1 12.3%
+step 740 | 2000-2199: 4.160 bits, top-1 25.2%
+step 740 | 1000-1199: 6.648 bits, top-1 11.4%
+epoch 9 done (37)s
+Early stopping: eval stoped improving
+TEST 2000-2199: 3.749 bits, top-1 26.4% (37,050 positions)
+TEST 1000-1199: 6.050 bits, top-1 11.4% (28,654 positions)

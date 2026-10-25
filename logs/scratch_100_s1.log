@@ -1,0 +1,52 @@
+trainable weights: 459145
+step 0 | 2000-2199: 4.683 bits, top-1 6.1%
+step 0 | 1000-1199: 4.588 bits, top-1 5.8%
+step 7 | 2000-2199: 4.645 bits, top-1 8.7%
+step 7 | 1000-1199: 4.566 bits, top-1 8.3%
+epoch 0 done (10)s
+step 14 | 2000-2199: 4.577 bits, top-1 9.9%
+step 14 | 1000-1199: 4.504 bits, top-1 9.3%
+epoch 1 done (9)s
+step 21 | 2000-2199: 4.502 bits, top-1 11.9%
+step 21 | 1000-1199: 4.462 bits, top-1 10.1%
+epoch 2 done (10)s
+step 28 | 2000-2199: 4.426 bits, top-1 12.9%
+step 28 | 1000-1199: 4.451 bits, top-1 11.7%
+epoch 3 done (10)s
+step 35 | 2000-2199: 4.355 bits, top-1 14.6%
+step 35 | 1000-1199: 4.488 bits, top-1 11.7%
+epoch 4 done (10)s
+step 42 | 2000-2199: 4.331 bits, top-1 16.3%
+step 42 | 1000-1199: 4.636 bits, top-1 11.2%
+epoch 5 done (10)s
+step 49 | 2000-2199: 4.337 bits, top-1 16.8%
+step 49 | 1000-1199: 4.843 bits, top-1 11.0%
+step 56 | 2000-2199: 4.371 bits, top-1 17.4%
+step 56 | 1000-1199: 5.133 bits, top-1 10.7%
+epoch 6 done (17)s
+step 63 | 2000-2199: 4.515 bits, top-1 17.1%
+step 63 | 1000-1199: 5.331 bits, top-1 10.4%
+epoch 7 done (10)s
+step 70 | 2000-2199: 4.637 bits, top-1 17.3%
+step 70 | 1000-1199: 5.722 bits, top-1 10.0%
+epoch 8 done (10)s
+step 77 | 2000-2199: 4.922 bits, top-1 17.2%
+step 77 | 1000-1199: 6.473 bits, top-1 9.4%
+epoch 9 done (10)s
+step 84 | 2000-2199: 5.055 bits, top-1 17.2%
+step 84 | 1000-1199: 6.593 bits, top-1 9.4%
+epoch 10 done (10)s
+step 91 | 2000-2199: 4.994 bits, top-1 17.2%
+step 91 | 1000-1199: 6.744 bits, top-1 9.5%
+epoch 11 done (10)s
+step 98 | 2000-2199: 5.547 bits, top-1 16.7%
+step 98 | 1000-1199: 7.951 bits, top-1 9.3%
+epoch 12 done (10)s
+step 105 | 2000-2199: 5.611 bits, top-1 16.8%
+step 105 | 1000-1199: 8.509 bits, top-1 8.9%
+step 112 | 2000-2199: 5.979 bits, top-1 17.2%
+step 112 | 1000-1199: 9.028 bits, top-1 9.1%
+epoch 13 done (17)s
+Early stopping: eval stoped improving
+TEST 2000-2199: 4.348 bits, top-1 16.1% (37,050 positions)
+TEST 1000-1199: 4.663 bits, top-1 11.1% (28,654 positions)

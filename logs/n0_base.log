@@ -1,0 +1,5 @@
+trainable weights: 459145
+VAL 2000-2199: 3.270 bits, top-1 33.5%
+VAL 1000-1199: 2.820 bits, top-1 41.5%
+TEST 2000-2199: 3.290 bits, top-1 33.4% (37,050 positions)
+TEST 1000-1199: 2.831 bits, top-1 41.3% (28,654 positions)

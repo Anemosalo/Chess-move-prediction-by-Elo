@@ -1,0 +1,18 @@
+{
+  "data": "2000-2199",
+  "init": "runs/base/best.pt",
+  "tune": "all",
+  "games": 100,
+  "epochs": 60,
+  "lr": 0.001,
+  "seed": 0,
+  "eval_every": 7,
+  "also": [
+    "1000-1199"
+  ],
+  "out": "ftall_100_s0_lr1e-3",
+  "test": true,
+  "eval_only": false,
+  "patience": 10,
+  "test_shards": 1
+}
