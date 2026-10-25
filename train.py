@@ -4,6 +4,8 @@ import math
 import torch.nn.functional as F
 import torch.nn as nn
 import time
+import json
+import glob
 #import matplotlib.pyplot as plt
 
 def load_shard(path):
@@ -70,61 +72,97 @@ class Network(nn.Module):
         underpromotions = torch.permute(head[:,64:,6,:],(0,2,1)).reshape(B,72)
         return torch.cat([normal_moves,underpromotions],dim=1)
 
-def eval(model,rows,planes,y,legal_flat,offsets,rating,device):
+def evaluate(model,rows,planes,y,legal_flat,offsets,rating,device):
     model.eval()
     total_bits= 0.0
     total_n = 0 #total positions
+    correct = 0
     with torch.no_grad():
         for start in range(0,len(rows),1024):
             idx = rows[start:start+1024] #next chunk of row nums
-            X, mask , targets = get_batch(idx,planes,y,legal_flat,offsets,rating)
-            X,mask,targets = X.to(device),mask.to(device),targets.to(device)
+            X, mask , target = get_batch(idx,planes,y,legal_flat,offsets,rating)
+            X,mask,target = X.to(device),mask.to(device),target.to(device)
             logits = model(X)
-            loss = F.cross_entropy(logits+mask,targets)/math.log(2)
+            model_prediction = (logits+mask).argmax(dim=1)
+            correct += (model_prediction==target).sum().item()
+            loss = F.cross_entropy(logits+mask,target)/math.log(2)
             total_bits+=loss.item()*len(idx)
             total_n+=len(idx)
         model.train()
-        return total_bits/total_n
+        return total_bits/total_n , correct/total_n
 
 def main():
     device = "cuda"if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu") 
     ## Getting the Data##
     B = 1024
-    planes, y, legal_flat, offsets, rating, split = load_shard("data/games_encoded/lichess_2026-09_elo1000-1199_blitz_000.npz")
-    train_rows = np.flatnonzero(split == 0)
-    val_rows = np.flatnonzero(split==1)
-    idx = np.random.choice(train_rows, B, replace=False)
-    X, mask, target = get_batch(idx, planes, y, legal_flat, offsets, rating)
-    X,mask,target = X.to(device) , mask.to(device), target.to(device)
+    paths = sorted(glob.glob("data/games_encoded/lichess_2026-09_elo1000-1199_blitz_*.npz"))
     ## NETWORK: ##
 
-    
+    val_data = load_shard(paths[0]) #tuple of (planes, y, legal_flat, offsets, rating, split)
+    val_rows = np.flatnonzero(val_data[5] == 1) # val_data[5] is split
     model = Network().to(device)
-    print("Before Training: ",eval(model,val_rows,planes,y,legal_flat,offsets,rating,device))
+    print("Before Training: ",evaluate(model,val_rows,*val_data[:5],device))
+    
+    
+    
+    
+    
+    
+    
     model.train()
     optimizier = torch.optim.Adam(model.parameters(),lr=1e-3)
     best = float("inf")
-    for epoch in range(3):
+
+    history = {"step":[] , "train_bits": [] , "val_step":[] , "val_bits":[], "val_top1": [], "epoch_end":[]}
+    step = 0
+    window_bits,window_n=0.0,0
+
+    val_bits, val_top1 = evaluate(model, val_rows, *val_data[:5], device)
+    history["val_step"].append(0)
+    history["val_bits"].append(val_bits)
+    history["val_top1"].append(val_top1)
+    for epoch in range(2):
         t = time.time()
-        order = np.random.permutation(train_rows)
+
         total_bits, total_n = 0.0,0
-        for start in range(0,len(order),B):
-            idx = order[start:start+B]
-            X, mask, target = get_batch(idx, planes, y, legal_flat, offsets, rating)
-            X,mask,target = X.to(device) , mask.to(device), target.to(device)
-            logits = model(X)  
-            loss = F.cross_entropy(logits+mask,target)/math.log(2) #calculated with natural log so we divide by log(2) to get bits meaning log_2 calculation instead of log_e
-            optimizier.zero_grad()
-            loss.backward()
-            optimizier.step()
-            total_bits = loss.item()*len(idx)
-            total_n = len(idx)
+        for path in np.random.permutation(paths):
+            planes, y, legal_flat, offsets, rating, split = load_shard(path) 
+            train_rows = np.flatnonzero(split==0)
+            order = np.random.permutation(train_rows)
+            for start in range(0,len(order),1024):
+                idx = order[start:start+B]
+                X, mask, target = get_batch(idx, planes, y, legal_flat, offsets, rating)
+                X,mask,target = X.to(device) , mask.to(device), target.to(device)
+                logits = model(X)  
+                loss = F.cross_entropy(logits+mask,target)/math.log(2) #calculated with natural log so we divide by log(2) to get bits meaning log_2 calculation instead of log_e
+                optimizier.zero_grad()
+                loss.backward()
+                optimizier.step()
+                total_bits += loss.item()*len(idx)
+                total_n += len(idx)
+
+                step+=1
+                window_bits+=loss.item()
+                window_n+=1
+                if step%50==0:
+                    history["step"].append(step)
+                    history["train_bits"].append(window_bits/window_n)
+                    window_bits,window_n=0.0,0
+            print(f"epoch {epoch} {path[-7:-4]}: train so far {total_bits/total_n:.3f}",flush=True)
+            val_bits, val_top1 = evaluate(model, val_rows, *val_data[:5], device)
+            history["val_step"].append(step)
+            history["val_bits"].append(val_bits)
+            history["val_top1"].append(val_top1)
+            with open("history.json","w") as f:
+                json.dump(history,f)
         train_bits = total_bits/total_n
-        val_bits = eval(model, val_rows, planes, y, legal_flat, offsets, rating, device)
-        print(f"epoch {epoch}: train {train_bits:.3f}  val {val_bits:.3f}  ({time.time() - t:.0f}s)")
+        history["epoch_end"].append(step)
+        with open("history.json","w") as f:
+            json.dump(history,f)
+        print(f"epoch {epoch}: train {train_bits:.3f}  val {val_bits:.3f}  ({time.time() - t:.0f}s)", flush=True)
         if val_bits < best:
             best = val_bits
-            torch.save(model.state_dict,"best.pt")
+            torch.save(model.state_dict(),"best.pt")
 
 
     
