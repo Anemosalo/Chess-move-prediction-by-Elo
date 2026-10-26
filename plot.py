@@ -124,11 +124,104 @@ def caption(h, cfg, test, log):
     return "\n".join(lines)
 
 
+def band_mid(b):
+    lo, hi = (int(x) for x in b.split("-"))
+    return (lo + hi + 1) / 2
+
+
+def draw_multi(fig, ax1, ax2, h, cfg, test, log, run_dir):
+    """One model trained on several bands: (1) bits over training, (2) each band minus the training-band mean,
+    (3) bits across ratings at the latest evaluation, with the never-trained bands as open circles."""
+    trained = train_bands(cfg)
+    bands = sorted(h["val"], key=lambda b: int(b.split("-")[0]))
+    m = h["val_mean"]
+    best_i = min(range(len(m["bits"])), key=lambda k: m["bits"][k]) if m["bits"] else None
+    fig.set_size_inches(17, 8.6)
+    ax1.set_position([0.05, 0.42, 0.265, 0.44])
+    ax2.set_position([0.375, 0.42, 0.265, 0.44])
+    ax3 = fig.add_axes([0.71, 0.42, 0.265, 0.44])
+
+    # 1. bits per move over training
+    if h["step"]:
+        ax1.plot(h["step"], h["train_bits"], color="tab:blue", alpha=0.5, lw=1.2, label="train loss (average of 50 steps)")
+    ax1.plot(m["step"], m["bits"], "-", color="black", lw=2.5, label="mean of the training bands (picks the checkpoint)")
+    for b in bands:
+        vb = h["val"][b]
+        style = "o-" if b in trained else "o--"
+        ax1.plot(vb["step"], vb["bits"], style, color=band_color(b, bands), ms=3, lw=1.3,
+                 label=f"{b} ({'trained level' if b in trained else 'never-seen level'})")
+    ax1.set_xlabel("training step (batches of 1,024 positions)")
+    ax1.set_ylabel("val bits per move  (lower is better)")
+    ax1.set_title("1. Every band over training", fontsize=10)
+
+    # 2. each band minus the mean of the training bands: shared ups and downs cancel, only the differences remain
+    for b in bands:
+        vb = h["val"][b]
+        n = min(len(vb["bits"]), len(m["bits"]))
+        ax2.plot(vb["step"][:n], [vb["bits"][k] - m["bits"][k] for k in range(n)], "o-" if b in trained else "o--",
+                 color=band_color(b, bands), ms=3, lw=1.3)
+    ax2.axhline(0, color="black", lw=2)
+    ax2.set_xlabel("training step (batches of 1,024 positions)")
+    ax2.set_ylabel("bits per move minus the training-band mean\n(above 0 = harder than average for the model)")
+    ax2.set_title("2. Each band compared with the training-band average", fontsize=10)
+
+    # 3. across ratings, at the latest evaluation
+    k = len(m["bits"]) - 1
+    tx = [band_mid(b) for b in bands if b in trained]
+    ty = [h["val"][b]["bits"][k] for b in bands if b in trained]
+    ax3.plot(tx, ty, "-", color="gray", lw=1.5, zorder=1, label="line through the trained levels")
+    for b in bands:
+        x, y = band_mid(b), h["val"][b]["bits"][k]
+        c = band_color(b, bands)
+        if b in trained:
+            ax3.plot(x, y, "o", color=c, ms=9, mec="black", mew=0.6, zorder=3)
+        else:
+            ax3.plot(x, y, "o", mfc="white", mec=c, mew=2.2, ms=10, zorder=3)
+            lower = [t for t in tx if t < x]
+            upper = [t for t in tx if t > x]
+            if lower and upper:                # in between two trained levels: distance from the straight line between them
+                x0, x1 = max(lower), min(upper)
+                y0, y1 = ty[tx.index(x0)], ty[tx.index(x1)]
+                gap = y - (y0 + (y1 - y0) * (x - x0) / (x1 - x0))
+                ax3.annotate(f"{gap:+.3f}", (x, y), xytext=(0, 10), textcoords="offset points", ha="center", fontsize=8)
+            else:
+                ax3.annotate("outside", (x, y), xytext=(0, 10), textcoords="offset points", ha="center", fontsize=7, color="dimgray")
+    ax3.plot([], [], "o", color="gray", mec="black", ms=8, label="trained level")
+    ax3.plot([], [], "o", mfc="white", mec="gray", mew=2, ms=8, label="never-seen level (number = distance from the line)")
+    ax3.set_xticks([band_mid(b) for b in bands])
+    ax3.set_xticklabels(bands, rotation=45, ha="right", fontsize=7)
+    ax3.set_ylabel("val bits per move  (lower is better)")
+    ax3.set_title(f"3. Across ratings at step {m['step'][k]:,}", fontsize=10)
+    ax3.legend(fontsize=7, loc="upper left")
+
+    for ax in (ax1, ax2, ax3):
+        ax.grid(alpha=0.25)
+    for ax in (ax1, ax2):
+        for s in h["epoch_end"]:
+            ax.axvline(s, color="lightgray", lw=0.8, zorder=0)
+        if best_i is not None:
+            ax.axvline(m["step"][best_i], color="black", ls="--", lw=1, alpha=0.6)
+    hd, lb = ax1.get_legend_handles_labels()
+    fig.legend(hd, lb, loc="upper center", bbox_to_anchor=(0.36, 0.30), ncol=3, fontsize=7.5, frameon=False)
+
+    name = os.path.basename(os.path.normpath(run_dir))
+    fig.texts.clear()
+    fig._suptitle = None
+    fig.suptitle(f"{name}: ONE model, measured on {len(bands)} rating levels.  {describe(cfg)}", fontsize=10, fontweight="bold", y=0.985)
+    fig.text(0.01, 0.015, caption(h, cfg, test, log)
+             + "\nPanel 3: if a never-seen level's open circle sits on the grey line (number near 0), the model predicts that rating as well "
+               "as the trained ratings around it. Val = shard 000 val rows; test = held-out rows, used once.",
+             fontsize=7.5, va="bottom", ha="left", family="monospace", wrap=True)
+
+
 def draw(fig, ax1, ax2, h, cfg, test, log, run_dir):
     ax1.clear()
     ax2.clear()
     for ax in fig.axes[2:]:            # old secondary axes from the previous redraw
         ax.remove()
+    if len(train_bands(cfg)) > 1:
+        draw_multi(fig, ax1, ax2, h, cfg, test, log, run_dir)
+        return
     band, v = selection(h, cfg)
     trained = train_bands(cfg)
     multi = len(trained) > 1
