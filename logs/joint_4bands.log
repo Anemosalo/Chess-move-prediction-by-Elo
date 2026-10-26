@@ -1,0 +1,164 @@
+training positions per band: {'1000-1199': 1445260, '1400-1599': 1608793, '1800-1999': 1763434, '2200-2399': 1893973}
+trainable weights: 459145
+step 0 | 1000-1199: 4.582 bits, top-1 6.6%
+step 0 | 1400-1599: 4.617 bits, top-1 6.5%
+step 0 | 1800-1999: 4.672 bits, top-1 6.5%
+step 0 | 2200-2399: 4.671 bits, top-1 5.9%
+step 0 | 1200-1399: 4.611 bits, top-1 6.8%
+step 0 | 1600-1799: 4.649 bits, top-1 6.4%
+step 0 | 2000-2199: 4.662 bits, top-1 6.4%
+step 0 | 800-999: 4.587 bits, top-1 6.8%
+step 0 | 2400-2599: 4.631 bits, top-1 6.0%
+step 0 | mean of training bands: 4.636 bits
+4 bands, 6,711,460 training positions, 6,554 steps per epoch
+step 1000 | 1000-1199: 3.313 bits, top-1 32.9%
+step 1000 | 1400-1599: 3.315 bits, top-1 33.0%
+step 1000 | 1800-1999: 3.351 bits, top-1 32.6%
+step 1000 | 2200-2399: 3.419 bits, top-1 31.3%
+step 1000 | 1200-1399: 3.365 bits, top-1 32.2%
+step 1000 | 1600-1799: 3.345 bits, top-1 32.3%
+step 1000 | 2000-2199: 3.388 bits, top-1 31.7%
+step 1000 | 800-999: 3.389 bits, top-1 31.8%
+step 1000 | 2400-2599: 3.489 bits, top-1 29.8%
+step 1000 | mean of training bands: 3.349 bits
+step 2000 | 1000-1199: 3.121 bits, top-1 36.5%
+step 2000 | 1400-1599: 3.095 bits, top-1 36.7%
+step 2000 | 1800-1999: 3.144 bits, top-1 35.8%
+step 2000 | 2200-2399: 3.211 bits, top-1 34.5%
+step 2000 | 1200-1399: 3.172 bits, top-1 35.7%
+step 2000 | 1600-1799: 3.144 bits, top-1 35.6%
+step 2000 | 2000-2199: 3.177 bits, top-1 35.2%
+step 2000 | 800-999: 3.203 bits, top-1 35.2%
+step 2000 | 2400-2599: 3.279 bits, top-1 33.2%
+step 2000 | mean of training bands: 3.143 bits
+step 3000 | 1000-1199: 3.043 bits, top-1 37.6%
+step 3000 | 1400-1599: 3.016 bits, top-1 38.0%
+step 3000 | 1800-1999: 3.064 bits, top-1 37.0%
+step 3000 | 2200-2399: 3.124 bits, top-1 36.1%
+step 3000 | 1200-1399: 3.074 bits, top-1 37.5%
+step 3000 | 1600-1799: 3.056 bits, top-1 37.2%
+step 3000 | 2000-2199: 3.091 bits, top-1 36.9%
+step 3000 | 800-999: 3.117 bits, top-1 36.7%
+step 3000 | 2400-2599: 3.201 bits, top-1 34.4%
+step 3000 | mean of training bands: 3.062 bits
+step 4000 | 1000-1199: 2.957 bits, top-1 39.0%
+step 4000 | 1400-1599: 2.936 bits, top-1 39.3%
+step 4000 | 1800-1999: 2.967 bits, top-1 38.7%
+step 4000 | 2200-2399: 3.020 bits, top-1 37.6%
+step 4000 | 1200-1399: 2.996 bits, top-1 38.3%
+step 4000 | 1600-1799: 2.965 bits, top-1 38.5%
+step 4000 | 2000-2199: 2.992 bits, top-1 38.4%
+step 4000 | 800-999: 3.039 bits, top-1 38.2%
+step 4000 | 2400-2599: 3.088 bits, top-1 36.1%
+step 4000 | mean of training bands: 2.970 bits
+step 5000 | 1000-1199: 2.913 bits, top-1 39.6%
+step 5000 | 1400-1599: 2.879 bits, top-1 40.3%
+step 5000 | 1800-1999: 2.923 bits, top-1 39.3%
+step 5000 | 2200-2399: 2.972 bits, top-1 38.4%
+step 5000 | 1200-1399: 2.948 bits, top-1 39.1%
+step 5000 | 1600-1799: 2.914 bits, top-1 39.2%
+step 5000 | 2000-2199: 2.948 bits, top-1 38.9%
+step 5000 | 800-999: 3.002 bits, top-1 38.5%
+step 5000 | 2400-2599: 3.051 bits, top-1 36.9%
+step 5000 | mean of training bands: 2.922 bits
+step 6000 | 1000-1199: 2.878 bits, top-1 40.6%
+step 6000 | 1400-1599: 2.845 bits, top-1 40.8%
+step 6000 | 1800-1999: 2.887 bits, top-1 39.9%
+step 6000 | 2200-2399: 2.936 bits, top-1 38.8%
+step 6000 | 1200-1399: 2.915 bits, top-1 39.8%
+step 6000 | 1600-1799: 2.884 bits, top-1 39.9%
+step 6000 | 2000-2199: 2.911 bits, top-1 39.5%
+step 6000 | 800-999: 2.971 bits, top-1 39.5%
+step 6000 | 2400-2599: 3.011 bits, top-1 37.3%
+step 6000 | mean of training bands: 2.887 bits
+epoch 0 done (932)s | passes started per band: {'1000-1199': 2, '1400-1599': 2, '1800-1999': 1, '2200-2399': 1}
+step 7000 | 1000-1199: 2.831 bits, top-1 41.1%
+step 7000 | 1400-1599: 2.796 bits, top-1 41.7%
+step 7000 | 1800-1999: 2.839 bits, top-1 40.8%
+step 7000 | 2200-2399: 2.886 bits, top-1 39.6%
+step 7000 | 1200-1399: 2.868 bits, top-1 40.4%
+step 7000 | 1600-1799: 2.831 bits, top-1 41.0%
+step 7000 | 2000-2199: 2.869 bits, top-1 40.3%
+step 7000 | 800-999: 2.922 bits, top-1 39.9%
+step 7000 | 2400-2599: 2.964 bits, top-1 38.3%
+step 7000 | mean of training bands: 2.838 bits
+step 8000 | 1000-1199: 2.805 bits, top-1 41.6%
+step 8000 | 1400-1599: 2.772 bits, top-1 42.1%
+step 8000 | 1800-1999: 2.808 bits, top-1 41.5%
+step 8000 | 2200-2399: 2.855 bits, top-1 40.1%
+step 8000 | 1200-1399: 2.844 bits, top-1 40.8%
+step 8000 | 1600-1799: 2.810 bits, top-1 41.0%
+step 8000 | 2000-2199: 2.833 bits, top-1 40.6%
+step 8000 | 800-999: 2.906 bits, top-1 40.4%
+step 8000 | 2400-2599: 2.924 bits, top-1 38.6%
+step 8000 | mean of training bands: 2.810 bits
+step 9000 | 1000-1199: 2.791 bits, top-1 42.0%
+step 9000 | 1400-1599: 2.758 bits, top-1 42.3%
+step 9000 | 1800-1999: 2.788 bits, top-1 41.5%
+step 9000 | 2200-2399: 2.828 bits, top-1 40.2%
+step 9000 | 1200-1399: 2.827 bits, top-1 41.0%
+step 9000 | 1600-1799: 2.782 bits, top-1 41.5%
+step 9000 | 2000-2199: 2.807 bits, top-1 41.0%
+step 9000 | 800-999: 2.901 bits, top-1 40.4%
+step 9000 | 2400-2599: 2.896 bits, top-1 38.9%
+step 9000 | mean of training bands: 2.791 bits
+step 10000 | 1000-1199: 2.768 bits, top-1 42.2%
+step 10000 | 1400-1599: 2.727 bits, top-1 42.6%
+step 10000 | 1800-1999: 2.761 bits, top-1 42.2%
+step 10000 | 2200-2399: 2.793 bits, top-1 41.3%
+step 10000 | 1200-1399: 2.804 bits, top-1 41.4%
+step 10000 | 1600-1799: 2.761 bits, top-1 41.9%
+step 10000 | 2000-2199: 2.784 bits, top-1 41.4%
+step 10000 | 800-999: 2.864 bits, top-1 41.0%
+step 10000 | 2400-2599: 2.871 bits, top-1 39.4%
+step 10000 | mean of training bands: 2.762 bits
+step 11000 | 1000-1199: 2.741 bits, top-1 42.6%
+step 11000 | 1400-1599: 2.705 bits, top-1 43.0%
+step 11000 | 1800-1999: 2.743 bits, top-1 42.4%
+step 11000 | 2200-2399: 2.775 bits, top-1 41.2%
+step 11000 | 1200-1399: 2.779 bits, top-1 41.5%
+step 11000 | 1600-1799: 2.741 bits, top-1 41.9%
+step 11000 | 2000-2199: 2.773 bits, top-1 41.5%
+step 11000 | 800-999: 2.840 bits, top-1 41.0%
+step 11000 | 2400-2599: 2.872 bits, top-1 39.3%
+step 11000 | mean of training bands: 2.741 bits
+step 12000 | 1000-1199: 2.736 bits, top-1 42.5%
+step 12000 | 1400-1599: 2.690 bits, top-1 43.2%
+step 12000 | 1800-1999: 2.726 bits, top-1 42.6%
+step 12000 | 2200-2399: 2.755 bits, top-1 41.5%
+step 12000 | 1200-1399: 2.771 bits, top-1 42.0%
+step 12000 | 1600-1799: 2.725 bits, top-1 42.3%
+step 12000 | 2000-2199: 2.746 bits, top-1 42.0%
+step 12000 | 800-999: 2.829 bits, top-1 41.6%
+step 12000 | 2400-2599: 2.843 bits, top-1 40.0%
+step 12000 | mean of training bands: 2.727 bits
+step 13000 | 1000-1199: 2.732 bits, top-1 42.4%
+step 13000 | 1400-1599: 2.679 bits, top-1 43.3%
+step 13000 | 1800-1999: 2.714 bits, top-1 42.6%
+step 13000 | 2200-2399: 2.750 bits, top-1 41.5%
+step 13000 | 1200-1399: 2.752 bits, top-1 42.1%
+step 13000 | 1600-1799: 2.714 bits, top-1 42.3%
+step 13000 | 2000-2199: 2.742 bits, top-1 41.9%
+step 13000 | 800-999: 2.834 bits, top-1 41.4%
+step 13000 | 2400-2599: 2.820 bits, top-1 40.2%
+step 13000 | mean of training bands: 2.719 bits
+epoch 1 done (938)s | passes started per band: {'1000-1199': 3, '1400-1599': 3, '1800-1999': 2, '2200-2399': 2}
+step 13108 | 1000-1199: 2.740 bits, top-1 42.7%
+step 13108 | 1400-1599: 2.690 bits, top-1 43.5%
+step 13108 | 1800-1999: 2.721 bits, top-1 42.5%
+step 13108 | 2200-2399: 2.754 bits, top-1 41.7%
+step 13108 | 1200-1399: 2.764 bits, top-1 42.0%
+step 13108 | 1600-1799: 2.723 bits, top-1 42.3%
+step 13108 | 2000-2199: 2.742 bits, top-1 41.9%
+step 13108 | 800-999: 2.839 bits, top-1 41.0%
+step 13108 | 2400-2599: 2.829 bits, top-1 40.4%
+step 13108 | mean of training bands: 2.726 bits
+TEST 1000-1199: 2.751 bits, top-1 42.5% (28,654 positions)
+TEST 1400-1599: 2.726 bits, top-1 42.6% (32,411 positions)
+TEST 1800-1999: 2.712 bits, top-1 42.5% (34,887 positions)
+TEST 2200-2399: 2.797 bits, top-1 40.8% (37,760 positions)
+TEST 1200-1399: 2.754 bits, top-1 42.0% (30,823 positions)
+TEST 1600-1799: 2.710 bits, top-1 42.7% (34,054 positions)
+TEST 2000-2199: 2.750 bits, top-1 41.8% (37,050 positions)
+TEST 800-999: 2.883 bits, top-1 40.7% (27,609 positions)
+TEST 2400-2599: 2.799 bits, top-1 40.8% (38,906 positions)

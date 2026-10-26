@@ -1,0 +1,27 @@
+{
+  "data": [
+    "1000-1199",
+    "1400-1599",
+    "1800-1999",
+    "2200-2399"
+  ],
+  "init": "scratch",
+  "tune": "all",
+  "games": null,
+  "epochs": 2,
+  "lr": 0.001,
+  "seed": 0,
+  "eval_every": 1000,
+  "also": [
+    "1200-1399",
+    "1600-1799",
+    "2000-2199",
+    "800-999",
+    "2400-2599"
+  ],
+  "out": "joint_4bands",
+  "test": true,
+  "eval_only": false,
+  "patience": null,
+  "test_shards": 1
+}
