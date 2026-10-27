@@ -36,11 +36,13 @@ def parse_args():
     p.add_argument("--sweep", nargs="*", default=None, help="model names to run the rating sweep on")
     p.add_argument("--ratings", nargs="+", type=int, default=SWEEP_RATINGS, help="ratings for the sweep")
     p.add_argument("--out", default=OUT, help="csv file to write")
+    p.add_argument("--data-dir", default="data", help="folder holding games_encoded/ (default data)")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+    train.DATA_DIR = args.data_dir
     models = dict(m.split("=", 1) for m in args.models) if args.models else MODELS
     sweep = args.sweep if args.sweep is not None else (SWEEP_MODELS if not args.models else list(models))
     device = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")

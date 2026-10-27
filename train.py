@@ -98,8 +98,8 @@ def parse_args():
     p = argparse.ArgumentParser(description="Training or evaluation of the move prediction network")
     p.add_argument("--data",nargs="+",default=["1000-1199"],help="the rating band(s) to train on for example 1000-1199, or several: 1000-1199 1400-1599 (then every batch mixes all of them)")
     p.add_argument("--init",default="scratch",help="'scratch' or a path to the saved weights from previous training")
-    p.add_argument("--tune",default="all", choices=["all","bn"],help="which weights are allowed to change. 'all' by default and 'bn' for only the Batch Norms γ and β")
-    p.add_argument("--games",type=int,default=None,help="Use only the first N training games")
+    p.add_argument("--tune",default="all", choices=["all","bn"],help="which weights are allowed to change. 'all' by default and 'bn' for only the Batch Norms γ and β plus the output layer")
+    p.add_argument("--games",type=int,default=None,help="Use only N training games: a random sample (set by --seed), taken shard by shard from the first shards")
     p.add_argument("--epochs",type=int,default=1,help="Number of epochs on the training data")
     p.add_argument("--lr",type=float,default=1e-3,help="Learning rate, 1e-3 by default")
     p.add_argument("--seed",type=int,default=0,help="Seed to get identical results on same seeds")
@@ -110,11 +110,14 @@ def parse_args():
     p.add_argument("--eval-only",action="store_true",help="No training just mesure --init ont --data and --also")
     p.add_argument("--patience", type=int,default=None,help="Stop after this number of evaluations if val is not improving. default = None means never stop early")
     p.add_argument("--test-shards", type=int, default=1, help="use the test rows of the first N shards (99 = all)")
+    p.add_argument("--data-dir", default="data", help="folder holding games_encoded/ (default data)")
     return p.parse_args()
 
 
+DATA_DIR = "data" # folder holding games_encoded/, changed with --data-dir
+
 def band_paths(band):
-    return sorted(glob.glob(f"data/games_encoded/lichess_2026-09_elo{band}_blitz_*.npz"))
+    return sorted(glob.glob(os.path.join(DATA_DIR,"games_encoded",f"lichess_2026-09_elo{band}_blitz_*.npz")))
 
 def take_rows(data,rows): ## smaller copy of a shard with only these rows (so a val set doesnt keep the whole ~380MB shard in memory)
     planes,y,legal_flat,offsets,rating,split,game_id = data
@@ -169,7 +172,7 @@ def next_rows(stream,n): ## the next n training rows of this band (fewer at the 
     stream["pos"]+=n
     return idx,stream["data"]
 
-def get_mixed_batch(streams,B): ## a batch of about B positions, B/len(streams) from every band
+def get_mixed_batch(streams,B): ## a batch of about B positions, B/len(streams) from every band (a band gives fewer when its shard ends mid-batch, a few batches per pass)
     per_band = B//len(streams)
     Xs,masks,ys = [],[],[]
     for s in streams:
@@ -208,6 +211,8 @@ def run_test(model, bands, n_shards, run_dir, device):
 def main():
 
     args = parse_args()
+    global DATA_DIR
+    DATA_DIR = args.data_dir
 
     run_dir = os.path.join("runs",args.out)
     os.makedirs(run_dir,exist_ok=False)

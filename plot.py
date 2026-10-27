@@ -1,4 +1,4 @@
-"""Plot of one training run, with a title saying what the run is and a caption saying what the curves show.
+"""Plot of one training run, with a title saying what the run is and a caption saying what the curves show (written by Claude).
 
 Usage:
   python3 plot.py runs/<name>          live window, redraws every REFRESH seconds until closed
@@ -81,7 +81,7 @@ def describe(cfg):
     if init == "scratch":
         what = "Trained from scratch (random start)"
     elif tune == "bn":
-        what = f"BatchNorm-only fine-tune of {init}"
+        what = f"BN scale/shift + output layer fine-tune of {init}"
     else:
         what = f"Full fine-tune of {init}"
     games = cfg.get("games")
@@ -131,7 +131,7 @@ def band_mid(b):
 
 def draw_multi(fig, ax1, ax2, h, cfg, test, log, run_dir):
     """One model trained on several bands: (1) bits over training, (2) each band minus the training-band mean,
-    (3) bits across ratings at the latest evaluation, with the never-trained bands as open circles."""
+    (3) bits across ratings at the best checkpoint, with the never-trained bands as open circles."""
     trained = train_bands(cfg)
     bands = sorted(h["val"], key=lambda b: int(b.split("-")[0]))
     m = h["val_mean"]
@@ -165,8 +165,8 @@ def draw_multi(fig, ax1, ax2, h, cfg, test, log, run_dir):
     ax2.set_ylabel("bits per move minus the training-band mean\n(above 0 = harder than average for the model)")
     ax2.set_title("2. Each band compared with the training-band average", fontsize=10)
 
-    # 3. across ratings, at the latest evaluation
-    k = len(m["bits"]) - 1
+    # 3. across ratings, at the best checkpoint (the one the test uses)
+    k = best_i if best_i is not None else len(m["bits"]) - 1
     tx = [band_mid(b) for b in bands if b in trained]
     ty = [h["val"][b]["bits"][k] for b in bands if b in trained]
     ax3.plot(tx, ty, "-", color="gray", lw=1.5, zorder=1, label="line through the trained levels")
@@ -191,8 +191,10 @@ def draw_multi(fig, ax1, ax2, h, cfg, test, log, run_dir):
     ax3.set_xticks([band_mid(b) for b in bands])
     ax3.set_xticklabels(bands, rotation=45, ha="right", fontsize=7)
     ax3.set_ylabel("val bits per move  (lower is better)")
-    ax3.set_title(f"3. Across ratings at step {m['step'][k]:,}", fontsize=10)
-    ax3.legend(fontsize=7, loc="upper left")
+    ax3.set_title(f"3. Across ratings at the best checkpoint (step {m['step'][k]:,})", fontsize=10)
+    lo, hi = ax3.get_ylim()
+    ax3.set_ylim(lo - 0.45 * (hi - lo), hi + 0.08 * (hi - lo))      # room under the points for the legend
+    ax3.legend(fontsize=7, loc="lower right")
 
     for ax in (ax1, ax2, ax3):
         ax.grid(alpha=0.25)

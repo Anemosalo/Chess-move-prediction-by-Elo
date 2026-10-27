@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fine-tuning experiment on 2000-2199. Run with:   caffeinate -i bash experiments.sh
+# Fine-tuning experiment on 2000-2199 (written by Claude). Run with:   caffeinate -i bash experiments.sh
 # A run whose folder already exists is skipped, so the script can be stopped and restarted.
 BASE=runs/base/best.pt
 mkdir -p logs

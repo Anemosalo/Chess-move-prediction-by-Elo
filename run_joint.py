@@ -1,9 +1,11 @@
-## Runs the whole multi-band experiment on one machine, step by step:
+## Runs the whole multi-band experiment on one machine, step by step (written by Claude):
 ##   1. unpack the game files (joint_games.tar.gz, made on the Mac with: extract_games.py data/games_uci_joint joint)
 ##   2. encode every band into shards
 ##   3. train ONE model on 4 bands at once (every batch mixes the 4 bands)
 ##   4. measure it on all 9 bands + the rating sweep
 ## Every step is skipped if it is already done, so after a crash just run it again.
+## All its data lives in data/joint/ (games_uci/ and games_encoded/), so it never touches the main data in data/.
+## (The run reported in results/ was made before this change, with the data in data/ on a second machine.)
 ##
 ## Usage (from the repo folder):  python run_joint.py
 ##        python run_joint.py --quick --archive small.tar.gz     (tiny version, only to check that everything runs)
@@ -23,6 +25,7 @@ RUN = "joint_4bands"
 EPOCHS = "2"
 EVAL_EVERY = "1000"
 SWEEP_RATINGS = [str(r) for r in range(800, 2601, 100)]
+DATA_DIR = os.path.join("data", "joint") # own folder: never overwrites the main data in data/
 
 quick = "--quick" in sys.argv
 archive = sys.argv[sys.argv.index("--archive") + 1] if "--archive" in sys.argv else "joint_games.tar.gz"
@@ -61,24 +64,24 @@ if device == "CPU ONLY":
 
 #-------------#
 # 1 + 2. Unpack and encode. The marker file says this exact data is ready (so old data with the same names is never used by mistake)
-marker = os.path.join("data", "joint_ready_" + os.path.basename(archive) + ".txt")
+marker = os.path.join(DATA_DIR, "joint_ready_" + os.path.basename(archive) + ".txt")
 if not os.path.exists(marker):
-    print(f"\n== 1. unpacking {archive} into data/games_uci", flush=True)
-    os.makedirs(os.path.join("data", "games_uci"), exist_ok=True)
+    print(f"\n== 1. unpacking {archive} into {DATA_DIR}/games_uci", flush=True)
+    os.makedirs(os.path.join(DATA_DIR, "games_uci"), exist_ok=True)
     with tarfile.open(archive) as t:
-        t.extractall(os.path.join("data", "games_uci"))
+        t.extractall(os.path.join(DATA_DIR, "games_uci"))
 
     print("\n== 2. encoding every band (2 at a time)", flush=True)
-    os.makedirs(os.path.join("data", "games_encoded"), exist_ok=True)
-    for band in ALL_BANDS: # remove old shards of these bands so they are made again from the unpacked games
-        for f in os.listdir(os.path.join("data", "games_encoded")):
+    os.makedirs(os.path.join(DATA_DIR, "games_encoded"), exist_ok=True)
+    for band in ALL_BANDS: # remove old shards of these bands in data/joint so they are made again from the unpacked games
+        for f in os.listdir(os.path.join(DATA_DIR, "games_encoded")):
             if f.startswith(name(band) + "_"):
-                os.remove(os.path.join("data", "games_encoded", f))
+                os.remove(os.path.join(DATA_DIR, "games_encoded", f))
     for i in range(0, len(ALL_BANDS), 2):
         procs = []
         for band in ALL_BANDS[i:i + 2]:
             log = open(os.path.join("logs", f"encode_{band}.log"), "w", encoding="utf-8")
-            procs.append((band, log, subprocess.Popen([sys.executable, "-u", "encode.py", name(band)], stdout=log, stderr=subprocess.STDOUT)))
+            procs.append((band, log, subprocess.Popen([sys.executable, "-u", "encode.py", name(band), "--data-dir", DATA_DIR], stdout=log, stderr=subprocess.STDOUT)))
         for band, log, p in procs:
             p.wait()
             log.close()
@@ -102,7 +105,7 @@ if not os.path.exists(os.path.join(run_dir, "test.json")):
     if os.path.exists(run_dir): # a run that crashed halfway: keep it aside and start again
         shutil.move(run_dir, run_dir + "_crashed_" + time.strftime("%H%M%S"))
     print(f"\n== 3. training {run_name} on {TRAIN_BANDS}", flush=True)
-    args = ["train.py", "--data"] + TRAIN_BANDS + ["--also"] + HELD_OUT + ["--test", "--out", run_name]
+    args = ["train.py", "--data"] + TRAIN_BANDS + ["--also"] + HELD_OUT + ["--test", "--out", run_name, "--data-dir", DATA_DIR]
     if quick:
         args += ["--games", "20", "--epochs", "1", "--eval-every", "5"]
     else:
@@ -113,13 +116,13 @@ else:
 print(f"({(time.time() - t_start) / 60:.0f} min so far)", flush=True)
 
 #-------------#
-# 4. Every band with the real ratings, and the rating sweep (is the rating plane a skill dial now?)
+# 4. Every band with the real ratings, and the rating sweep (does the best rating follow the band now?)
 out = os.path.join("results", "bands_eval_" + run_name + ".csv")
 if not os.path.exists(out):
     print("\n== 4. measuring every band + rating sweep", flush=True)
     ratings = ["800", "1600", "2400"] if quick else SWEEP_RATINGS
     run(["eval_bands.py", "--models", f"{run_name}={run_dir}/best.pt", "--bands"] + ALL_BANDS
-        + ["--sweep", run_name, "--ratings"] + ratings + ["--out", out], os.path.join("logs", "eval_" + run_name + ".log"))
+        + ["--sweep", run_name, "--ratings"] + ratings + ["--out", out, "--data-dir", DATA_DIR], os.path.join("logs", "eval_" + run_name + ".log"))
 else:
     print(f"\n== 4. {out} already exists, skipping", flush=True)
 

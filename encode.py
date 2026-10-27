@@ -169,7 +169,11 @@ def main():
     parser.add_argument("name", nargs="?", default="lichess_2026-09_elo1000-1199_blitz",
                         help="file name in data/games_uci without .txt")
     parser.add_argument("--limit", type=int, default=None, help="only the first N games (for testing)")
+    parser.add_argument("--data-dir", default="data", help="folder holding games_uci/ and games_encoded/ (default data)")
     args = parser.parse_args()
+    global IN_DIR, OUT_DIR
+    IN_DIR = os.path.join(args.data_dir, "games_uci")
+    OUT_DIR = os.path.join(args.data_dir, "games_encoded")
     encode_file(args.name, limit=args.limit)
     check_shards(args.name)
 
